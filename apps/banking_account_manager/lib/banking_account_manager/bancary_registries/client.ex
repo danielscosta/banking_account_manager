@@ -18,10 +18,10 @@ defmodule BankingAccountManager.BancaryRegistries.Client do
     field :country, :string
     field :cpf, :string, virtual: true
     field :email, :string, virtual: true
-    field :encrypted_birth_date, :string
-    field :encrypted_cpf, :string
-    field :encrypted_email, :string
-    field :encrypted_name, :string
+    field :encrypted_birth_date, :binary
+    field :encrypted_cpf, :binary
+    field :encrypted_email, :binary
+    field :encrypted_name, :binary
     field :gender, :string
     field :name, :string, virtual: true
     field :referral_code, :string
@@ -99,22 +99,26 @@ defmodule BankingAccountManager.BancaryRegistries.Client do
   defp encrypt_birth_date(%{changes: %{birth_date: birth_date}} = changeset)
        when not is_nil(birth_date),
        do:
-         put_change(changeset, :encrypted_birth_date, Encryption.hash(Date.to_string(birth_date)))
+         put_change(
+           changeset,
+           :encrypted_birth_date,
+           Encryption.encrypt(Date.to_string(birth_date))
+         )
 
   defp encrypt_birth_date(changeset), do: changeset
 
   defp encrypt_cpf(%{changes: %{cpf: cpf}} = changeset) when not is_nil(cpf),
-    do: put_change(changeset, :encrypted_cpf, Encryption.hash(cpf))
+    do: put_change(changeset, :encrypted_cpf, Encryption.encrypt(cpf))
 
   defp encrypt_cpf(changeset), do: changeset
 
   defp encrypt_email(%{changes: %{email: email}} = changeset) when not is_nil(email),
-    do: put_change(changeset, :encrypted_email, Encryption.hash(email))
+    do: put_change(changeset, :encrypted_email, Encryption.encrypt(email))
 
   defp encrypt_email(changeset), do: changeset
 
   defp encrypt_name(%{changes: %{name: name}} = changeset) when not is_nil(name),
-    do: put_change(changeset, :encrypted_name, Encryption.hash(name))
+    do: put_change(changeset, :encrypted_name, Encryption.encrypt(name))
 
   defp encrypt_name(changeset), do: changeset
 end

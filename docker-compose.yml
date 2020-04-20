@@ -49,6 +49,7 @@ services:
       - "4000:4000"
     environment:
       - DATABASE_URL=postgres://postgres:postgres@banking-account-manager-db/banking_account_manager
+      - ENCRYPTION_KEY=+fmYuFICS1a5ZVxesmRrpQ==
     depends_on:
       - db
 

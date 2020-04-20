@@ -35,6 +35,31 @@ defmodule BankingAccountManager.BancaryRegistriesTest do
       assert BancaryRegistries.get_account!(account.id) == account
     end
 
+    test "get_related_account!/1 returns the related account with given id and name" do
+      assert {:ok, %{account: %Account{} = account}} =
+               BancaryRegistries.upsert_account(@complete_valid_attrs)
+
+      name = Faker.Name.name()
+
+      assert {:ok, %{account: %Account{} = related_account}} =
+               BancaryRegistries.upsert_account(%{
+                 cpf: Brcpfcnpj.cpf_generate(),
+                 name: name,
+                 referral_code: account.referral_code
+               })
+
+      assert {:ok, [%{id: related_account.id, name: String.downcase(name)}]} ==
+               BancaryRegistries.get_related_accounts!(account.id)
+    end
+
+    test "get_related_account!/1 with invalid account return error" do
+      assert {:ok, %{account: %Account{} = account}} =
+               BancaryRegistries.upsert_account(@parcial_valid_attrs)
+
+      assert {:error, message: message} = BancaryRegistries.get_related_accounts!(account.id)
+      assert message == "That functionality is only permitted for complete accounts!"
+    end
+
     test "upsert_account/1 with valid data(incomplete) creates a account" do
       assert {:ok, %{account: %Account{} = account}} =
                BancaryRegistries.upsert_account(@parcial_valid_attrs)

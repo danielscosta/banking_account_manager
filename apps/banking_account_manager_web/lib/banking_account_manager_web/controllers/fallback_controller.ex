@@ -13,6 +13,13 @@ defmodule BankingAccountManagerWeb.FallbackController do
     |> render("error.json", changeset: changeset)
   end
 
+  def call(conn, {:error, message: message}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(BankingAccountManagerWeb.ErrorView)
+    |> render("error_message.json", message: message)
+  end
+
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)

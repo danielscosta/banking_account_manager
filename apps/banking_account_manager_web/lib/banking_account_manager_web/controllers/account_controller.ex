@@ -28,4 +28,10 @@ defmodule BankingAccountManagerWeb.AccountController do
       send_resp(conn, :no_content, "")
     end
   end
+
+  def related_accounts(conn, %{"id" => id}) do
+    with {:ok, related_accounts} <- BancaryRegistries.get_related_accounts!(id) do
+      render(conn, "index.json", related_accounts: related_accounts)
+    end
+  end
 end

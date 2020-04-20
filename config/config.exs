@@ -11,7 +11,8 @@ import Config
 
 # Configure Mix tasks and generators
 config :banking_account_manager,
-  ecto_repos: [BankingAccountManager.Repo]
+  ecto_repos: [BankingAccountManager.Repo],
+  encryption_key: "+fmYuFICS1a5ZVxesmRrpQ=="
 
 config :banking_account_manager_web,
   ecto_repos: [BankingAccountManager.Repo],

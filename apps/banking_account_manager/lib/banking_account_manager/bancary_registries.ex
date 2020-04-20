@@ -29,6 +29,37 @@ defmodule BankingAccountManager.BancaryRegistries do
   def get_account!(id), do: Repo.get!(Account, id)
 
   @doc """
+  Gets a list of related accounts.
+
+  ## Examples
+
+      iex> get_related_account(id)
+      [%{id: id, name:name}]
+
+  """
+  def get_related_accounts!(id) do
+    account = get_account!(id)
+
+    if account.status == "complete" do
+      related_accounts =
+        Account
+        |> join(:inner, [a], c in assoc(a, :client))
+        |> where([a, c], c.referral_code == ^account.referral_code)
+        |> select([a, c], %{id: a.id, encrypted_name: c.encrypted_name})
+        |> Repo.all()
+
+      related_accounts =
+        Enum.map(related_accounts, fn %{id: id, encrypted_name: encrypted_name} ->
+          %{id: id, name: Encryption.decrypt(encrypted_name)}
+        end)
+
+      {:ok, related_accounts}
+    else
+      {:error, message: "That functionality is only permitted for complete accounts!"}
+    end
+  end
+
+  @doc """
   Create or Update a account.
 
   ## Examples
@@ -76,7 +107,7 @@ defmodule BankingAccountManager.BancaryRegistries do
 
   defp get_client_by_cpf(nil), do: nil
 
-  defp get_client_by_cpf(cpf), do: Repo.get_by(Client, encrypted_cpf: Encryption.hash(cpf))
+  defp get_client_by_cpf(cpf), do: Repo.get_by(Client, encrypted_cpf: Encryption.encrypt(cpf))
 
   @doc """
   Deletes a account.

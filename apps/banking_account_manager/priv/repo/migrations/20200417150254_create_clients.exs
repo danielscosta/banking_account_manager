@@ -4,10 +4,10 @@ defmodule BankingAccountManager.Repo.Migrations.CreateClients do
   def change do
     create table(:clients, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :encrypted_name, :string
-      add :encrypted_email, :string
-      add :encrypted_cpf, :string
-      add :encrypted_birth_date, :string
+      add :encrypted_name, :binary
+      add :encrypted_email, :binary
+      add :encrypted_cpf, :binary
+      add :encrypted_birth_date, :binary
       add :gender, :string
       add :city, :string
       add :state, :string

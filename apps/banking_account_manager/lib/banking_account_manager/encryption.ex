@@ -1,11 +1,26 @@
 defmodule BankingAccountManager.Encryption do
   @moduledoc """
-   This module encrypt and validate data.
+   This module encrypt and validate data by https://www.thegreatcodeadventure.com/elixir-encryption-with-erlang-crypto/.
   """
-  alias Bcrypt
+  @aad "AES256GCM"
 
-  def hash(data), do: Bcrypt.hash_pwd_salt(data)
+  def encrypt(val) do
+    key = Application.get_env(:banking_account_manager, :encryption_key)
+    mode = :aes_gcm
+    secret_key = :base64.decode(key)
+    iv = :crypto.strong_rand_bytes(16)
 
-  def validate(encrypted_data, data),
-    do: Bcrypt.verify_pass(data, encrypted_data)
+    {ciphertext, ciphertag} =
+      :crypto.block_encrypt(mode, secret_key, iv, {@aad, to_string(val), 16})
+
+    iv <> ciphertag <> ciphertext
+  end
+
+  def decrypt(ciphertext) do
+    key = Application.get_env(:banking_account_manager, :encryption_key)
+    mode = :aes_gcm
+    secret_key = :base64.decode(key)
+    <<iv::binary-16, tag::binary-16, ciphertext::binary>> = ciphertext
+    :crypto.block_decrypt(mode, secret_key, iv, {@aad, ciphertext, tag})
+  end
 end
