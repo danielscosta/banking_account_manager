@@ -5,7 +5,7 @@ config :banking_account_manager, BankingAccountManager.Repo,
   username: "postgres",
   password: "postgres",
   database: "banking_account_manager_test",
-  hostname: "localhost",
+  hostname: System.get_env("PG_HOST", "localhost"),
   pool: Ecto.Adapters.SQL.Sandbox
 
 # We don't run a server during test. If one is required,

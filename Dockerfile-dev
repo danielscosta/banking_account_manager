@@ -1,0 +1,24 @@
+FROM elixir:1.10-alpine
+
+# init
+RUN apk update && \
+    apk add ca-certificates && update-ca-certificates && \
+    apk add git bash postgresql-client openssl curl && \
+    mix local.hex --force && \
+    mix local.rebar --force && \
+    mkdir -p /back_account_manager 
+
+COPY . /back_account_manager
+ENV MIX_ENV=dev
+
+# get and compile elixir deps
+RUN apk add --update alpine-sdk coreutils
+
+RUN cd /back_account_manager && \
+    mix deps.get && (cd deps/bcrypt_elixir && make clean && make) && mix compile
+
+WORKDIR /back_account_manager
+
+EXPOSE 4000
+
+CMD ["sh", "-c", "mix phx.server"]

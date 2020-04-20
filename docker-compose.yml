@@ -1,0 +1,57 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=banking_account_manager
+    ports:
+      - "5403:5432"
+    networks:
+      default:
+        aliases:
+          - banking-account-manager-db
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    volumes:
+      - .:/banking_account_manager
+      - "build:/banking_account_manager/_build"
+      - "deps:/banking_account_manager/deps"  
+    environment:
+      - PG_HOST=banking-account-manager-db 
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile-test
+    volumes:
+      - .:/banking_account_manager
+      - "build:/banking_account_manager/_build"
+      - "deps:/banking_account_manager/deps"
+    environment:
+      - PG_HOST=banking-account-manager-db 
+    depends_on:
+      - db
+
+  release:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@banking-account-manager-db/banking_account_manager
+    depends_on:
+      - db
+
+volumes:
+  build:
+  deps:

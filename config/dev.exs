@@ -5,7 +5,7 @@ config :banking_account_manager, BankingAccountManager.Repo,
   username: "postgres",
   password: "postgres",
   database: "banking_account_manager_dev",
-  hostname: "localhost",
+  hostname: System.get_env("PG_HOST", "localhost"),
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 

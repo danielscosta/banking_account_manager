@@ -14,11 +14,11 @@ defmodule BankingAccountManager.Umbrella.MixProject do
         "coveralls.html": :test
       ],
       releases: [
-        bancary_account_manager: [
+        banking_account_manager: [
           include_executables_for: [:unix],
           applications: [
-            bancary_account_manager: :permanent,
-            bancary_account_manager_web: :permanent,
+            banking_account_manager: :permanent,
+            banking_account_manager_web: :permanent,
             runtime_tools: :permanent,
             jason: :permanent
           ],
