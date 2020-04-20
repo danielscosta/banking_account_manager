@@ -15,7 +15,7 @@ ENV MIX_ENV=dev
 RUN apk add --update alpine-sdk coreutils
 
 RUN cd /back_account_manager && \
-    mix deps.get && (cd deps/bcrypt_elixir && make clean && make) && mix compile
+    mix deps.get && mix compile
 
 WORKDIR /back_account_manager
 

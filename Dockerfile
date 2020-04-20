@@ -43,7 +43,7 @@ RUN apk update && \
 # This copies our app source code into the build container
 COPY . .
 
-RUN mix deps.get && (cd deps/bcrypt_elixir && make clean && make) && mix do deps.compile, compile
+RUN mix deps.get && mix do deps.compile, compile
 
 RUN mix do release ${APP_NAME}
 
