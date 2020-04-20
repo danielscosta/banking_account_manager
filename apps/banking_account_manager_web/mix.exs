@@ -43,7 +43,8 @@ defmodule BankingAccountManagerWeb.MixProject do
       {:gettext, "~> 0.11"},
       {:banking_account_manager, in_umbrella: true},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:faker, "~> 0.13", only: :test}
     ]
   end
 

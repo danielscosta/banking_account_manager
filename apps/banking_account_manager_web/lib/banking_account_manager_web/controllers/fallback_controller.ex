@@ -6,7 +6,7 @@ defmodule BankingAccountManagerWeb.FallbackController do
   """
   use BankingAccountManagerWeb, :controller
 
-  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+  def call(conn, {:error, :client, %Ecto.Changeset{} = changeset, %{}}) do
     conn
     |> put_status(:unprocessable_entity)
     |> put_view(BankingAccountManagerWeb.ChangesetView)

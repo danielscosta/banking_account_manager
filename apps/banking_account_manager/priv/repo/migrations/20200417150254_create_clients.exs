@@ -17,5 +17,7 @@ defmodule BankingAccountManager.Repo.Migrations.CreateClients do
       timestamps()
     end
 
+    create unique_index(:clients, [:encrypted_email])
+    create unique_index(:clients, [:encrypted_cpf])
   end
 end

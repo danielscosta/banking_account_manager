@@ -7,5 +7,8 @@ defmodule BankingAccountManagerWeb.Router do
 
   scope "/api", BankingAccountManagerWeb do
     pipe_through :api
+
+    resources "/accounts", AccountController, only: [:show, :delete]
+    put "/accounts", AccountController, :upsert
   end
 end

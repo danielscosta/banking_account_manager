@@ -6,116 +6,11 @@ defmodule BankingAccountManager.BancaryRegistries do
   import Ecto.Query, warn: false
   alias BankingAccountManager.Repo
 
-  alias BankingAccountManager.BancaryRegistries.Client
-
-  @doc """
-  Returns the list of clients.
-
-  ## Examples
-
-      iex> list_clients()
-      [%Client{}, ...]
-
-  """
-  def list_clients do
-    Repo.all(Client)
-  end
-
-  @doc """
-  Gets a single client.
-
-  Raises `Ecto.NoResultsError` if the Client does not exist.
-
-  ## Examples
-
-      iex> get_client!(123)
-      %Client{}
-
-      iex> get_client!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_client!(id), do: Repo.get!(Client, id)
-
-  @doc """
-  Creates a client.
-
-  ## Examples
-
-      iex> create_client(%{field: value})
-      {:ok, %Client{}}
-
-      iex> create_client(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_client(attrs \\ %{}) do
-    %Client{}
-    |> Client.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a client.
-
-  ## Examples
-
-      iex> update_client(client, %{field: new_value})
-      {:ok, %Client{}}
-
-      iex> update_client(client, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_client(%Client{} = client, attrs) do
-    client
-    |> Client.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a client.
-
-  ## Examples
-
-      iex> delete_client(client)
-      {:ok, %Client{}}
-
-      iex> delete_client(client)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_client(%Client{} = client) do
-    Repo.delete(client)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking client changes.
-
-  ## Examples
-
-      iex> change_client(client)
-      %Ecto.Changeset{source: %Client{}}
-
-  """
-  def change_client(%Client{} = client) do
-    Client.changeset(client, %{})
-  end
+  alias BankingAccountManager.Encryption
 
   alias BankingAccountManager.BancaryRegistries.Account
-
-  @doc """
-  Returns the list of accounts.
-
-  ## Examples
-
-      iex> list_accounts()
-      [%Account{}, ...]
-
-  """
-  def list_accounts do
-    Repo.all(Account)
-  end
+  alias BankingAccountManager.BancaryRegistries.Client
+  alias Ecto.Multi
 
   @doc """
   Gets a single account.
@@ -134,40 +29,54 @@ defmodule BankingAccountManager.BancaryRegistries do
   def get_account!(id), do: Repo.get!(Account, id)
 
   @doc """
-  Creates a account.
+  Create or Update a account.
 
   ## Examples
 
-      iex> create_account(%{field: value})
-      {:ok, %Account{}}
+      iex> upsert_account(%{field: value})
+      {:ok, %{client: %Client{}, account: %Account{}}}
 
-      iex> create_account(%{field: bad_value})
+      iex> upsert_account(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_account(attrs \\ %{}) do
-    %Account{}
-    |> Account.changeset(attrs)
-    |> Repo.insert()
+  def upsert_account(attrs \\ %{}) do
+    Multi.new()
+    |> Multi.run(:client, fn _repo, _changes ->
+      client = get_client_by_cpf(attrs["cpf"] || attrs[:cpf]) || %Client{}
+
+      client
+      |> Client.changeset(attrs)
+      |> Repo.insert_or_update()
+    end)
+    |> Multi.run(:account, fn _repo, %{client: client} = _changes ->
+      is_complete? =
+        client
+        |> Map.from_struct()
+        |> Map.keys()
+        |> Enum.reduce(true, fn key, acc ->
+          acc and not is_nil(Map.get(client, key))
+        end)
+
+      status =
+        if is_complete? do
+          "complete"
+        else
+          "draft"
+        end
+
+      account = Repo.get_by(Account, client_id: client.id) || %Account{}
+
+      account
+      |> Account.changeset(%{client_id: client.id, status: status})
+      |> Repo.insert_or_update()
+    end)
+    |> Repo.transaction()
   end
 
-  @doc """
-  Updates a account.
+  defp get_client_by_cpf(nil), do: nil
 
-  ## Examples
-
-      iex> update_account(account, %{field: new_value})
-      {:ok, %Account{}}
-
-      iex> update_account(account, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_account(%Account{} = account, attrs) do
-    account
-    |> Account.changeset(attrs)
-    |> Repo.update()
-  end
+  defp get_client_by_cpf(cpf), do: Repo.get_by(Client, encrypted_cpf: Encryption.hash(cpf))
 
   @doc """
   Deletes a account.

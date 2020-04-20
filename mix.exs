@@ -5,7 +5,27 @@ defmodule BankingAccountManager.Umbrella.MixProject do
     [
       apps_path: "apps",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
+      releases: [
+        bancary_account_manager: [
+          include_executables_for: [:unix],
+          applications: [
+            bancary_account_manager: :permanent,
+            bancary_account_manager_web: :permanent,
+            runtime_tools: :permanent,
+            jason: :permanent
+          ],
+          quiet: true
+        ]
+      ],
+      version: "0.1.0"
     ]
   end
 
@@ -22,6 +42,9 @@ defmodule BankingAccountManager.Umbrella.MixProject do
   # Dependencies listed here are available only for this project
   # and cannot be accessed from applications inside the apps folder
   defp deps do
-    []
+    [
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.12.3", only: :test}
+    ]
   end
 end

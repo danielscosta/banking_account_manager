@@ -38,7 +38,10 @@ defmodule BankingAccountManager.MixProject do
     [
       {:ecto_sql, "~> 3.1"},
       {:postgrex, ">= 0.0.0"},
-      {:jason, "~> 1.0"}
+      {:jason, "~> 1.0"},
+      {:bcrypt_elixir, "~> 2.0"},
+      {:brcpfcnpj, "~> 0.2.0"},
+      {:faker, "~> 0.13", only: :test}
     ]
   end
 
